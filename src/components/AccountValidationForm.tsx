@@ -4,20 +4,22 @@ import Typography from "@mui/material/Typography";
 import FormInput from "./FormInput";
 import PrimaryButton from "./PrimaryButton";
 import CommonLoader from "./Loaders/CommonLoader";
-import { SignUpUser } from "../api/modules/loginSignup/signup-service";
+import { ValidateCustomer } from "../api/modules/loginSignup/signup-service";
 import { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
-import { AlertComponent } from "./Common/AlertComponent";
 import { Button } from "@mui/material";
+import { screens } from "./SignUp/model";
 
 interface AccountValidationFormProps {
-  onSubmit: (values: {
+  handleAfterValidationSuccess: (values: {
     accountNumber: string;
     billingZipCode: string;
     customerId?: string;
   }) => Promise<void>;
   onToggleToLogin: () => void;
+  setActiveScreen: (screenName: string) => void;
   isSubmitting: boolean;
+  setAlertModel?: any;
 }
 
 interface FieldErrors {
@@ -26,28 +28,23 @@ interface FieldErrors {
 }
 
 const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
-  onSubmit,
+  handleAfterValidationSuccess = () => {},
   onToggleToLogin,
+  setActiveScreen,
   isSubmitting,
+  setAlertModel,
 }) => {
   const [values, setValues] = useState({
     accountNumber: "",
     billingZipCode: "",
   });
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [alertModel, setAlertModel] = useState<any>({
-    open: false,
-    message: "",
-  });
   const [validatAccountCount, setValidAccountCount] = useState<number>(0);
-
-  // const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const VALIDATION_RULES = {
     accountNumber: (val: string) => {
       if (!val?.trim()) return "Account Number is required";
-      if (!/^\d+$/.test(val) || val.length !== 7)
-        return "Invalid Account Number.";
+      if (!/^\d+$/.test(val)) return "Invalid Account Number.";
       return "";
     },
     billingZipCode: (val: string) => {
@@ -99,42 +96,35 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
     event.preventDefault();
     if (!validate()) {
       return;
-    }
-    // else signUpUser(values);
-    void onSubmit(values);
+    } else signUpUser(values);
+    // void handleAfterValidationSuccess(values);
   };
 
   // ........................API..................//
 
-  const { isPending: isSigningLoading, mutate: signUpUser } = useMutation({
-    mutationFn: SignUpUser,
+   const { isPending: isSigningLoading, mutate: signUpUser } = useMutation({
+    mutationFn: ValidateCustomer,
     onSuccess: (response) => {
-      // const mockRes = {
-      //   customerId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      //   isValid: true,
-      //   isValidAccountId: true,
-      //   enableNewRequest: false,
-      //   isActive: true,
-      //   responseMessage: "string",
-      // };
-      if (response?.data?.isValid) {
-        onSubmit({ ...values, customerId: response?.data?.customerId });
+      const data = response as any;
+
+      if (data?.isValid) {
+        handleAfterValidationSuccess({
+          ...values,
+          customerId: data?.customerId,
+        });
       } else {
         setAlertModel({
           open: true,
           message: "Invalid Account Number or Billing Zip Code.",
         });
-        if (response?.data?.enableNewRequest) {
-          //
-        }
         // is invalid account
-        if (response?.data?.isValidAccountId === false) {
+        if (data?.isValidAccountId === false) {
           setErrors({
             accountNumber: "Invalid Account Number.",
             billingZipCode: "",
           });
           setValidAccountCount(validatAccountCount + 1);
-        } else if (response?.data?.isActive === false) {
+        } else if (data?.isActive === false) {
           setAlertModel({
             open: true,
             message:
@@ -143,20 +133,16 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
         }
       }
     },
-    onError: (error: AxiosError) => {
-      console.log(error.response?.data);
+    onError: (_error: AxiosError) => {
+      setAlertModel({
+        open: true,
+        message: "Something went wrong! Please try again.",
+      });
     },
   });
-
   //-------------------------END-------------------------//
   return (
     <>
-      <AlertComponent
-        severity="error"
-        open={alertModel?.open}
-        message={alertModel?.message || ""}
-        onClose={() => setAlertModel({ open: false, message: "" })}
-      />
       <CommonLoader loading={isSubmitting || isSigningLoading} />
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ px: 2 }}>
         <Typography
@@ -173,29 +159,11 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
         </Typography>
 
         <Box sx={{ position: "relative" }}>
-          {/* <Typography
-          variant="caption"
-          sx={{
-            position: 'absolute',
-            left: 16,
-            top: isLabelFloating('accountNumber') ? 8 : '24%',
-            transform: isLabelFloating('accountNumber') ? 'translateY(0)' : 'translateY(-50%)',
-            transition: 'all 0.2s ease-in-out',
-            backgroundColor: 'background.paper',
-            px: 0.5,
-            color: 'text.secondary',
-            fontSize: '0.75rem',
-            pointerEvents: 'none',
-            zIndex: 1
-          }}
-        >
-          Account Number
-        </Typography> */}
           <FormInput
             name="accountNumber"
             label="Account Number"
             type="text"
-            autoComplete="off"
+            autoComplete="given-name"
             value={values.accountNumber}
             onChange={(e: any) => {
               handleChange("accountNumber", e);
@@ -203,29 +171,11 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
             }}
             error={Boolean(errors.accountNumber)}
             helperText={errors.accountNumber}
-            inputProps={{ "aria-label": "Account Number" }}
+            inputProps={{ "aria-label": "Account Number", maxLength: 7 }}
           />
         </Box>
 
         <Box sx={{ position: "relative", mt: 0 }}>
-          {/* <Typography
-          variant="caption"
-          sx={{
-            position: 'absolute',
-            left: 16,
-            top: isLabelFloating('billingZipCode') ? 8 : '24%',
-            transform: isLabelFloating('billingZipCode') ? 'translateY(0)' : 'translateY(-50%)',
-            transition: 'all 0.2s ease-in-out',
-            backgroundColor: 'background.paper',
-            px: 0.5,
-            color: 'text.secondary',
-            fontSize: '0.75rem',
-            pointerEvents: 'none',
-            zIndex: 1
-          }}
-        >
-          Billing Zip Code
-        </Typography> */}
           <FormInput
             name="billingZipCode"
             label="Billing Zip Code"
@@ -249,7 +199,7 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
             fontSize: 16,
             fontWeight: 500,
             borderRadius: "8px",
-            mt: 6,
+            mt: 4,
             mb: 2,
             height: 48,
           }}
@@ -268,6 +218,7 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
               mb: 2,
               height: 48,
             }}
+            onClick={() => setActiveScreen(screens.newAccountRequest)}
           >
             Request New Account
           </Button>

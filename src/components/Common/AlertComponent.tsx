@@ -18,7 +18,7 @@ export const AlertComponent: React.FC<AlertComponentProps> = ({
   onClose,
   severity = "success",
   variant = "filled",
-  duration = 3000,
+  duration = 2000,
 }) => {
   return (
     <Snackbar

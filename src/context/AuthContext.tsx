@@ -99,7 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    const getLoginRequest = (email?: string): RedirectRequest => ({
     scopes: [],
     prompt: "login",
-    ...(email && { loginHint: email }),
+    ...(email && { loginHint: email, extraQueryParameters: { hsu: '1'} }),
   });
   const loginRedirect = useCallback(async (email?: string): Promise<void> => {
     try {

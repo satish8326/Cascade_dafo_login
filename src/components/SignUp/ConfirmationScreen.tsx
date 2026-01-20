@@ -2,11 +2,21 @@ import { Box, Typography } from "@mui/material";
 import Link from "@mui/material/Link";
 import confirmationImage from "../../assets/confirmation.svg";
 import SubtitleText from "../Common/SubtitleText";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 interface Props {
   infoText: any;
 }
 const ConfirmationScreen: React.FC<Props> = ({ infoText }) => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setTimeout(() => {
+      navigate("/login");
+    }, 5000);
+  }, []);
+
   return (
     <Box
       sx={{
@@ -42,8 +52,9 @@ const ConfirmationScreen: React.FC<Props> = ({ infoText }) => {
           fontSize: 17,
           textDecoration: "underline",
           color: "#0088CB",
+          mt: 1,
         }}
-        onClick={() => {}}
+        onClick={() => navigate("/login")}
       >
         Go to Login
       </Link>

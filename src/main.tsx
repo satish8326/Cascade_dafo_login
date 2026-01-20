@@ -7,6 +7,7 @@ import { msalInstance } from './auth/msalInstance';
 import { MsalProvider } from '@azure/msal-react';
 
 async function bootstrap() {
+  await msalInstance.initialize();
   ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
       <MsalProvider instance={msalInstance}>

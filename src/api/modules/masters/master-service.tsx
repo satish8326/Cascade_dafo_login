@@ -1,9 +1,13 @@
-import axios from "axios"; // update the axios with the specific instance of axios interface service layer
 import { cascadeDafoNowURLs } from "../../url/config";
+import { get } from "../../apiService";
 
-export const GetPractitionersDropdownList = async (contactParams: any) => {
-  console.log("here");
-  const url = `${cascadeDafoNowURLs().contactsList}`;
-  const response = await axios.get(url);
+export const GetContactsByCustomer = async (contactParams: {
+  customerId?: string;
+  searchName?: string;
+  pageNumber?: number;
+  pageSize?: number;
+}) => {
+  const url = `${cascadeDafoNowURLs().login.getContactsByCustomer}`;
+  const response = await get(url, contactParams);
   return response;
 };
