@@ -7,8 +7,14 @@ import { useEffect } from "react";
 
 interface Props {
   infoText: any;
+  titleText?: string;
+  isMobile?: boolean;
 }
-const ConfirmationScreen: React.FC<Props> = ({ infoText }) => {
+const ConfirmationScreen: React.FC<Props> = ({
+  infoText,
+  titleText = "",
+  isMobile,
+}) => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,21 +33,31 @@ const ConfirmationScreen: React.FC<Props> = ({ infoText }) => {
         py: 2,
       }}
     >
-      <img src={confirmationImage} alt="" height={211} width={311} />
+      <img
+        src={confirmationImage}
+        alt=""
+        height={isMobile ? 80 : 211}
+        width={isMobile ? 180 : 311}
+      />
       <Typography
-        variant="h5"
+        variant={isMobile ? "h6" : "h5"}
         sx={{
           fontWeight: 500,
-          fontSize: 24,
+          fontSize: isMobile ? 18 : 24,
           textAlign: "center",
-          mt: 2,
+          mt: isMobile ? 1 : 2,
         }}
       >
-        Sign up Complete
+        {titleText ? titleText : "Sign up Complete"}
       </Typography>
       <SubtitleText
         subtitleText="Thank you for helping kids live happier, healthier lives"
-        sx={{ fontSize: 17, mt: 2, letterSpacing: "0.4px" }}
+        sx={{
+          textAlign: "center",
+          fontSize: isMobile ? 12 : 17,
+          mt: isMobile ? 1 : 2,
+          letterSpacing: "0.4px",
+        }}
       />
       {infoText}
       <Link
@@ -49,7 +65,7 @@ const ConfirmationScreen: React.FC<Props> = ({ infoText }) => {
         type="button"
         sx={{
           fontWeight: 400,
-          fontSize: 17,
+          fontSize: isMobile ? 12 : 17,
           textDecoration: "underline",
           color: "#0088CB",
           mt: 1,

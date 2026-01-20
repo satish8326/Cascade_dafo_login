@@ -28,12 +28,14 @@ interface SignUpFormProps {
   setActiveScreen: (screenName: string) => void;
   setAlertModel?: any;
   customerId?: string;
+  isMobile?: boolean;
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({
   setActiveScreen,
   setAlertModel,
   customerId,
+  isMobile,
 }) => {
   const [values, setValues] = useState<SignUpFormValues>({
     firstName: "",
@@ -78,7 +80,8 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
 
     if (isCaptchaEnabled?.checked === false) {
       setCaptchaError("Please verify you are human");
-    } else if (isCaptchaEnabled?.isValid === false) return false;
+    }
+    if (isCaptchaEnabled?.isValid === false) return false;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -114,22 +117,32 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
   return (
     <>
       <CommonLoader loading={signUpLoading} />
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ px: 2 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        noValidate
+        sx={{
+          px: {
+            lg: 2,
+            sm: 0,
+          },
+        }}
+      >
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            mb: 2,
+            mb: isMobile ? 1 : 2,
             cursor: "pointer",
           }}
           onClick={() => setActiveScreen(screens.searchContact)}
         >
           <ArrowBackIcon sx={{ mr: 1, fontSize: 20 }} />
           <Typography
-            variant="h5"
+            variant={isMobile ? "h6" : "h5"}
             sx={{
               fontWeight: 500,
-              fontSize: 21,
+              fontSize: isMobile ? 16 : 21,
               textAlign: "left",
             }}
           >
@@ -140,13 +153,13 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
           variant="body2"
           sx={{
             color: "#000000",
-            fontSize: 16,
+            fontSize: isMobile ? 12 : 16,
           }}
         >
           Don’t see your name on the list? <br /> Just enter your details to
           finish signing up.
         </Typography>
-        <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+        <Box sx={{ display: "flex", gap: 2, mt: isMobile ? 0 : 1 }}>
           <Box sx={{ position: "relative", flex: 1 }}>
             <FormInput
               name="firstName"

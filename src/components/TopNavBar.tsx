@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
   { label: "Templates", path: "/templates" },
 ];
 
-const TopNavBar: React.FC = () => {
+const TopNavBar: React.FC<{ hideMenuNavigations?: boolean }> = ({ hideMenuNavigations = false }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = React.useState(false);

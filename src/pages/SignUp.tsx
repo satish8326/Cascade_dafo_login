@@ -5,17 +5,23 @@ import SignUpFlow from "../sections/SignUpFlow";
 import "../components/SignUp/signup.css";
 import { useState } from "react";
 import { screens } from "../components/SignUp/model";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 const SignUp = () => {
-  const [activeScreen, setActiveScreen] = useState<string>(screens.signUp); // screens.signUp
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+  const [activeScreen, setActiveScreen] = useState<string>(
+    screens.signUp
+  ); // screens.signUp
 
   // to make certain customisation for screens
   const getCardHeight = () => {
     switch (activeScreen) {
       // case screens.signUp:
       //   return "auto";
-      case screens.addNewContact || screens?.newAccountRequest:
-        return 780;
+      case screens?.newAccountRequest:
+        return 700;
       default:
         return "auto";
     }
@@ -47,8 +53,8 @@ const SignUp = () => {
         sx={{
           height: getCardHeight(),
           transition: "height 0.3s ease",
-          width: { md: "auto", lg: "100%" },
-        }} // Smooth transition
+          width: { md: "60%", lg: "100%", sm: "60%", xs: "90%" },
+        }}
       >
         <Box
           sx={{
@@ -73,8 +79,8 @@ const SignUp = () => {
                 src={cascadeDafoLogo}
                 alt="Cascade"
                 style={{
-                  height: 106,
-                  width: 156,
+                  height: isSmall ? 60 : 106,
+                  width: isSmall ? 80 : 156,
                   display: "block",
                 }}
               />
@@ -84,7 +90,10 @@ const SignUp = () => {
             variant="subtitle1"
             sx={{
               fontWeight: 700,
-              fontSize: "22px",
+              fontSize: {
+                xs: 15,
+                lg: 22,
+              },
               color: "#333946",
             }}
           >

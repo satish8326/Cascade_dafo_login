@@ -1,6 +1,7 @@
 import {
   existingOrNewSignUpModel,
   signUpModel,
+  newRequestModel
 } from "../../../components/SignUp/model";
 import { cascadeDafoNowURLs } from "../../url/config";
 import { post } from "../../apiService";
@@ -19,6 +20,12 @@ export const ExistingUserSignUp = async (model: existingOrNewSignUpModel) : Prom
 
 export const NewUserSignUp = async (model: existingOrNewSignUpModel) : Promise<any> => {
   const url = `${cascadeDafoNowURLs().login.newSignUp}`;
+  const response = await post(url, model);
+  return response;
+};
+
+export const NewRequestSignUp = async (model: newRequestModel) => {
+  const url = `${cascadeDafoNowURLs().login.newAccountRequestSignup}`;
   const response = await post(url, model);
   return response;
 };

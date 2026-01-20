@@ -5,10 +5,12 @@ import FormInput from "./FormInput";
 import PrimaryButton from "./PrimaryButton";
 import CommonLoader from "./Loaders/CommonLoader";
 import { ValidateCustomer } from "../api/modules/loginSignup/signup-service";
-import { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@mui/material";
 import { screens } from "./SignUp/model";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+import { AxiosError } from "axios";
 
 interface AccountValidationFormProps {
   handleAfterValidationSuccess: (values: {
@@ -34,6 +36,9 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
   isSubmitting,
   setAlertModel,
 }) => {
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+
   const [values, setValues] = useState({
     accountNumber: "",
     billingZipCode: "",
@@ -102,7 +107,7 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
 
   // ........................API..................//
 
-   const { isPending: isSigningLoading, mutate: signUpUser } = useMutation({
+  const { isPending: isSigningLoading, mutate: signUpUser } = useMutation({
     mutationFn: ValidateCustomer,
     onSuccess: (response) => {
       const data = response as any;
@@ -140,19 +145,28 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
       });
     },
   });
+
   //-------------------------END-------------------------//
   return (
     <>
       <CommonLoader loading={isSubmitting || isSigningLoading} />
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ px: 2 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        noValidate
+        sx={{
+          px: {
+            lg: 2,
+            sm: 0,
+          },
+        }}
+      >
         <Typography
-          variant="h5"
+          variant={isSmall ? "h6" : "h5"}
           sx={{
             fontWeight: 500,
-            fontSize: 21,
             textAlign: "left",
-            mt: 1,
-            mb: 1,
+            my: isSmall ? 0 : 1,
           }}
         >
           Sign up
@@ -199,8 +213,8 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
             fontSize: 16,
             fontWeight: 500,
             borderRadius: "8px",
-            mt: 4,
-            mb: 2,
+            mt: isSmall ? 2 : 4,
+            mb: 1,
             height: 48,
           }}
         >
@@ -227,7 +241,7 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
         <Box
           sx={{
             textAlign: "center",
-            fontSize: 16,
+            fontSize: isSmall ? 14 : 16,
           }}
         >
           <span>Already have an account? </span>

@@ -6,6 +6,7 @@ export const cascadeDafoNowURLs = () => {
         getContactsByCustomer: "Auth/get-contacts-by-customerId",
         existingSignUp: "Auth/existing-signup",
         newSignUp: "Auth/new-signup",
+        newAccountRequestSignup: "Auth/new-request-signup",
       }
   };
 };
