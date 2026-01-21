@@ -1,6 +1,6 @@
 import SubtitleText from "../components/Common/SubtitleText";
 import MainLayout from "../layouts/MainLayout";
-import { Box, Card, Grid, Typography } from "@mui/material";
+import { Box, Card, Typography } from "@mui/material";
 import FormInput from "../components/FormInput";
 import { useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";

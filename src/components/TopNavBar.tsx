@@ -26,12 +26,6 @@ export interface NavItem {
   path: string;
 }
 
-const navItems: NavItem[] = [
-  { label: "Home", path: "/dashboard" },
-  { label: "Products", path: "/products" },
-  { label: "Orders", path: "/orders" },
-  { label: "Templates", path: "/templates" },
-];
 
 const TopNavBar: React.FC<{ hideMenuNavigations?: boolean }> = ({ hideMenuNavigations = false }) => {
   const theme = useTheme();
@@ -39,7 +33,12 @@ const TopNavBar: React.FC<{ hideMenuNavigations?: boolean }> = ({ hideMenuNaviga
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
+  const navItems = hideMenuNavigations ? [] : [
+    { label: "Home", path: "/dashboard" },
+    { label: "Products", path: "/products" },
+    { label: "Orders", path: "/orders" },
+    { label: "Templates", path: "/templates" },
+  ];
   const toggleDrawer = (open: boolean) => () => {
     setDrawerOpen(open);
   };
