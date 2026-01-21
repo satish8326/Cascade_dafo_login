@@ -21,21 +21,23 @@ export const AlertComponent: React.FC<AlertComponentProps> = ({
   duration = 2000,
 }) => {
   return (
-    <Snackbar
-      open={open}
-      autoHideDuration={duration}
-      onClose={onClose}
-      anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      sx={{ mt: 2 }}
-    >
-      <Alert
+    open && (
+      <Snackbar
+        open={open}
+        autoHideDuration={duration}
         onClose={onClose}
-        severity={severity}
-        variant={variant}
-        sx={{ width: "100%", boxShadow: 3 }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{ mt: 2 }}
       >
-        {message}
-      </Alert>
-    </Snackbar>
+        <Alert
+          onClose={onClose}
+          severity={severity}
+          variant={variant}
+          sx={{ width: "100%", boxShadow: 3 }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
+    )
   );
 };

@@ -9,6 +9,8 @@ import { screens } from "./SignUp/model";
 import { useMutation } from "@tanstack/react-query";
 import { ExistingUserSignUp } from "../api/modules/loginSignup/signup-service";
 import CommonLoader from "./Loaders/CommonLoader";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 interface NameSearchFormProps {
   setActiveScreen: (screenName?: string) => void;
@@ -21,6 +23,9 @@ const NameSearchForm: React.FC<NameSearchFormProps> = ({
   setAlertModel,
   customerId,
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const [error, setError] = useState<string>("");
   const [captchaError, setCaptchaError] = useState<string>("");
   const [selectedContact, setSelectedContact] = useState<any>({});
@@ -32,7 +37,7 @@ const NameSearchForm: React.FC<NameSearchFormProps> = ({
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     setError("");
-    if (!selectedContact) {
+    if (!selectedContact?.contactId) {
       setError("Please select a name from the list");
       return;
     } else if (isCaptchaEnabled?.checked === false) {
@@ -48,9 +53,12 @@ const NameSearchForm: React.FC<NameSearchFormProps> = ({
     useMutation({
       mutationFn: ExistingUserSignUp,
       onSuccess: (response) => {
-        if (response) {
-          setActiveScreen(screens.existingContactConfirmation);
-        }
+        if (response?.isRetryExceeded) {
+          setAlertModel({
+            open: true,
+            message: "Multiple sign-up attempts detected. Please contact Cascade Support.",
+          });
+        } else setActiveScreen(screens.existingContactConfirmation);
       },
       onError: (error: any) => {
         setAlertModel({
@@ -66,12 +74,22 @@ const NameSearchForm: React.FC<NameSearchFormProps> = ({
   return (
     <>
       <CommonLoader loading={isSigningLoading} />
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ px: 2 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        noValidate
+        sx={{
+          px: {
+            lg: 2,
+            sm: 0,
+          },
+        }}
+      >
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            mb: 2,
+            mb: isMobile ? 0 : 2,
           }}
         >
           <ArrowBackIcon
@@ -83,7 +101,7 @@ const NameSearchForm: React.FC<NameSearchFormProps> = ({
             onClick={() => setActiveScreen(screens.signUp)}
           />
           <Typography
-            variant="h5"
+            variant={isMobile ? "h6" : "h5"}
             sx={{
               fontWeight: 500,
               fontSize: 21,
@@ -101,7 +119,7 @@ const NameSearchForm: React.FC<NameSearchFormProps> = ({
           sx={{
             mb: 2,
             color: "text.secondary",
-            fontSize: 16,
+            fontSize: isMobile ? 10 : 16,
           }}
         >
           Just pick your name from the list to finish signing up.
@@ -131,7 +149,7 @@ const NameSearchForm: React.FC<NameSearchFormProps> = ({
             fontSize: 16,
             fontWeight: 500,
             borderRadius: "8px",
-            mb: 2,
+            mb: isMobile ? 1 : 2,
             height: 48,
           }}
         >
@@ -141,14 +159,14 @@ const NameSearchForm: React.FC<NameSearchFormProps> = ({
         <Box
           sx={{
             textAlign: "center",
-            fontSize: 13,
+            fontSize: isMobile ? 10 : 16,
           }}
         >
           <span>Your name&apos;s not on the list? </span>
           <span
             style={{
               fontWeight: 600,
-              fontSize: 16,
+              fontSize: isMobile ? 10 : 16,
               color: "#0088CB",
               cursor: "pointer",
               paddingLeft: "6px",

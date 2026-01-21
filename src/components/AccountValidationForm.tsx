@@ -36,6 +36,12 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
   isSubmitting,
   setAlertModel,
 }) => {
+  const attemptCountStr =
+    typeof window !== "undefined" ? localStorage.getItem("attemptCount") : null;
+
+  const validationCount =
+    attemptCountStr !== null ? JSON.parse(attemptCountStr) : 0;
+
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -44,7 +50,6 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
     billingZipCode: "",
   });
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [validatAccountCount, setValidAccountCount] = useState<number>(0);
 
   const VALIDATION_RULES = {
     accountNumber: (val: string) => {
@@ -62,7 +67,7 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
 
   const handleChange = (
     field: keyof typeof values,
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setValues((prev) => ({ ...prev, [field]: event.target.value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -76,10 +81,10 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
       const error = rule ? rule(value) : "";
 
       setErrors((prev: any) =>
-        prev[name] === error ? prev : { ...prev, [name]: error }
+        prev[name] === error ? prev : { ...prev, [name]: error },
       );
     },
-    []
+    [],
   );
 
   const validate = (): boolean => {
@@ -111,30 +116,36 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
     mutationFn: ValidateCustomer,
     onSuccess: (response) => {
       const data = response as any;
-
       if (data?.isValid) {
+        localStorage.removeItem("attemptCount");
         handleAfterValidationSuccess({
           ...values,
           customerId: data?.customerId,
         });
       } else {
-        setAlertModel({
-          open: true,
-          message: "Invalid Account Number or Billing Zip Code.",
-        });
         // is invalid account
         if (data?.isValidAccountId === false) {
           setErrors({
             accountNumber: "Invalid Account Number.",
             billingZipCode: "",
           });
-          setValidAccountCount(validatAccountCount + 1);
-        } else if (data?.isActive === false) {
+          localStorage.setItem("attemptCount", validationCount + 1);
+        } else {
+          const message = data?.isValidAccountId
+            ? "Invalid Billing Zip Code."
+            : "Invalid Account Number.";
           setAlertModel({
             open: true,
-            message:
-              "Account Number is not an active account. Contact Customer Support.",
+            message: message,
           });
+          localStorage.removeItem("attemptCount");
+          if (data?.isActive === false) {
+            setAlertModel({
+              open: true,
+              message:
+                "Account Number is not an active account. Contact Customer Support.",
+            });
+          }
         }
       }
     },
@@ -145,7 +156,6 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
       });
     },
   });
-
   //-------------------------END-------------------------//
   return (
     <>
@@ -220,7 +230,7 @@ const AccountValidationForm: React.FC<AccountValidationFormProps> = ({
         >
           Next
         </PrimaryButton>
-        {validatAccountCount >= 3 && (
+        {Number(validationCount) >= 3 && (
           <Button
             fullWidth
             disabled={false}

@@ -15,11 +15,17 @@ const CaptchaComp: React.FC<Props> = ({
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   return (
-    <div>
+    <Box sx={{ height: 58 }}>
       {showCaptcha ? (
-        <Box sx={{ mt: 1 }}>
+        <Box
+          sx={{
+            mt: 1,
+            width: "100%",
+          }}
+        >
           <Turnstile
             siteKey="0x4AAAAAACLeEQVBdQeog0Gn"
+            style={{ width: "100%" }}
             onSuccess={(token: any) => {
               setCaptchaToken(token);
               setCaptchaError("");
@@ -86,7 +92,7 @@ const CaptchaComp: React.FC<Props> = ({
           {captchaError}
         </Typography>
       )}
-    </div>
+    </Box>
   );
 };
 

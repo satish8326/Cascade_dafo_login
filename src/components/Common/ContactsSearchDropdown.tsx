@@ -1,9 +1,10 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { Autocomplete, TextField, CircularProgress } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import debounce from "lodash/debounce";
 import { GetContactsByCustomer } from "../../api/modules/masters/master-service";
 import SubtitleText from "./SubtitleText";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 export const ContactsSearchDropdown = ({
   selectedContact,
@@ -12,6 +13,9 @@ export const ContactsSearchDropdown = ({
   setError = () => {},
   setSelectedContact = () => {},
 }: any) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const latestRequestIdRef = useRef<number>(0);
   const [contactsList, setContactsList] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -30,7 +34,7 @@ export const ContactsSearchDropdown = ({
       // Ignore older requests
       if (variables.requestId !== latestRequestIdRef.current) return;
 
-      const newData = response?.data || [];
+      const newData = response || [];
       const formatted = newData.map((data: any) => ({
         label: `${data?.firstName ?? ""} ${data?.middleName ?? ""} ${
           data?.lastName ?? ""
@@ -38,14 +42,14 @@ export const ContactsSearchDropdown = ({
         value: data?.contactId,
       }));
       setContactsLoading(false);
-      if (variables.current === 1) {
+      if (variables.pageNumber === 1) {
         setContactsList(formatted);
       } else {
         setContactsList((prevList) => {
           const combinedList = [...prevList, ...formatted];
           const uniqueList = combinedList?.reduce((acc: any[], current) => {
             const isDuplicate = acc?.some(
-              (item) => item?.value === current?.value
+              (item) => item?.value === current?.value,
             );
             if (!isDuplicate) {
               acc?.push(current);
@@ -61,19 +65,18 @@ export const ContactsSearchDropdown = ({
   });
 
   // 2. Debounced Fetching
-  const fetchContacts = useMemo(
-    () =>
-      debounce((query: string, currentPage: number) => {
-        const requestId = ++latestRequestIdRef.current;
-        getContactsByCustomer({
-          customerId: customerId,
-          pageNumber: currentPage,
-          pageSize: 20,
-          searchName: query,
-          requestId,
-        } as any);
-      }, 600),
-    [getContactsByCustomer]
+  const fetchContacts = useCallback(
+    debounce((query: string, currentPage: number) => {
+      const requestId = ++latestRequestIdRef.current;
+      getContactsByCustomer({
+        customerId: customerId,
+        pageNumber: currentPage,
+        pageSize: 20,
+        searchName: query,
+        requestId,
+      } as any);
+    }, 600),
+    [getContactsByCustomer],
   );
 
   // 3. Handle Scrolling (Infinite Scroll)
@@ -92,8 +95,8 @@ export const ContactsSearchDropdown = ({
   };
 
   const getAllContactDetails = (contactVal?: any) => {
-    return contactsData?.data && contactsData?.data?.length > 0
-      ? contactsData?.data?.find((i: any) => i?.contactId === contactVal?.value)
+    return contactsData && contactsData?.length > 0
+      ? contactsData?.find((i: any) => i?.contactId === contactVal?.value)
       : null;
   };
 
@@ -110,6 +113,16 @@ export const ContactsSearchDropdown = ({
           setSelectedContact(getAllContactDetails(newValue));
           setError("");
         }}
+        sx={{
+          "& .MuiInputLabel-root": {
+            fontSize: isMobile ? "12px" : "15px",
+          },
+          "& .MuiInputBase-root": {
+            height: isMobile ? 44 : 52,
+            fontSize: isMobile ? "12px" : "16px",
+            paddingRight: "8px !important",
+          },
+        }}
         onInputChange={(_, newInputValue) => {
           setInputValue(newInputValue);
           setError("");
@@ -124,7 +137,10 @@ export const ContactsSearchDropdown = ({
         // Use ListboxProps to catch the scroll event
         ListboxProps={{
           onScroll: handleScroll,
-          style: { maxHeight: "300px" },
+          style: {
+            maxHeight: isMobile ? "200px" : "300px",
+            fontSize: isMobile ? "14px" : "16px",
+          },
         }}
         renderInput={(params) => (
           <TextField
@@ -139,8 +155,11 @@ export const ContactsSearchDropdown = ({
               ...params.InputProps,
               endAdornment: (
                 <>
-                  {isLoading ? (
-                    <CircularProgress color="inherit" size={20} />
+                  {isLoading || contactsLoading ? (
+                    <CircularProgress
+                      color="inherit"
+                      size={isMobile ? 16 : 20}
+                    />
                   ) : null}
                   {params.InputProps.endAdornment}
                 </>
@@ -155,8 +174,8 @@ export const ContactsSearchDropdown = ({
           isLoading || contactsLoading
             ? "Loading contacts ... "
             : inputValue && inputValue?.length < 3
-            ? "Enter 3+ letters to search"
-            : "No Records Found"
+              ? "Enter 3+ letters to search"
+              : "No Records Found"
         }
       />
       {selectedContact && (
@@ -166,7 +185,12 @@ export const ContactsSearchDropdown = ({
               ? `Your registered email: ${selectedContact?.email}`
               : ""
           }
-          sx={{ mt: 1, fontSize: "16px", color: "#929292", fontWeight: 400 }}
+          sx={{
+            mt: 1,
+            fontSize: isMobile ? "12px" : "16px",
+            color: "#929292",
+            fontWeight: 400,
+          }}
         />
       )}
     </>

@@ -11,16 +11,18 @@ export interface MainLayoutProps {
   children: React.ReactNode;
   fullWidth?: boolean;
   hideFooter?: boolean;
+  hideMenuNavigations?: boolean;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
   children,
   fullWidth = false,
   hideFooter = false,
+  hideMenuNavigations = false,
 }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      <TopNavBar />
+      <TopNavBar hideMenuNavigations={hideMenuNavigations}/>
       <Box
         component="main"
         sx={{
